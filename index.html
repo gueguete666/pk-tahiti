@@ -15,7 +15,7 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    background: #f5f5f5;
+    background: #f2f2f2;
 }
 
 h1 {
@@ -32,8 +32,8 @@ h1 {
     background:white;
     margin:10px;
     padding:15px;
-    border-radius:10px;
-    font-size:24px;
+    border-radius:12px;
+    font-size:23px;
 }
 
 .valeur {
@@ -47,7 +47,6 @@ h1 {
 
 <body>
 
-
 <h1>📍 PK Tahiti</h1>
 
 
@@ -57,45 +56,35 @@ h1 {
 <div class="info">
 🛣️ Axe :
 <br>
-<span class="valeur" id="axe">
-Recherche...
-</span>
+<span class="valeur" id="axe">Recherche...</span>
 </div>
 
 
 <div class="info">
 📍 PK :
 <br>
-<span class="valeur" id="pk">
-Recherche...
-</span>
+<span class="valeur" id="pk">Recherche...</span>
 </div>
 
 
 <div class="info">
 ⬆️ Sens :
 <br>
-<span class="valeur" id="sens">
-Recherche...
-</span>
+<span class="valeur" id="sens">Recherche...</span>
 </div>
 
 
 <div class="info">
 🏘️ Commune :
 <br>
-<span class="valeur" id="commune">
-Recherche...
-</span>
+<span class="valeur" id="commune">Recherche...</span>
 </div>
 
 
 <div class="info">
 🏛️ Chef-lieu :
 <br>
-<span class="valeur" id="chef">
-Recherche...
-</span>
+<span class="valeur" id="chef">Recherche...</span>
 </div>
 
 
@@ -106,14 +95,18 @@ Recherche...
 <script>
 
 
+// Création carte
+
 let carte = L.map('map')
 .setView([-17.55,-149.55],14);
 
 
 L.tileLayer(
-'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-)
-.addTo(carte);
+'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+attribution:'OpenStreetMap'
+}
+).addTo(carte);
 
 
 
@@ -122,23 +115,59 @@ let marqueur = L.marker([-17.55,-149.55])
 
 
 
+// Chargement des données routes
+
+let routes = [];
+
+
+fetch("donnees/routes.json")
+
+.then(response => response.json())
+
+.then(data => {
+
+routes = data.axes;
+
+document.getElementById("axe").innerHTML =
+routes[0].nom;
+
+})
+
+.catch(() => {
+
+document.getElementById("axe").innerHTML =
+"Erreur données routes";
+
+});
+
+
+
+
+// GPS
+
 function positionGPS(position){
 
 
-let lat = position.coords.latitude;
-let lon = position.coords.longitude;
+let latitude = position.coords.latitude;
+
+let longitude = position.coords.longitude;
 
 
-marqueur.setLatLng([lat,lon]);
 
-carte.setView([lat,lon]);
+marqueur.setLatLng([
+latitude,
+longitude
+]);
 
 
-// Données temporaires
+carte.setView([
+latitude,
+longitude
+]);
 
-document.getElementById("axe").innerHTML =
-"En attente des données routes";
 
+
+// Affichage test
 
 document.getElementById("pk").innerHTML =
 "En attente des PK";
@@ -149,26 +178,37 @@ document.getElementById("sens").innerHTML =
 
 
 document.getElementById("commune").innerHTML =
-"Faaa (test)";
+"En attente";
 
 
 document.getElementById("chef").innerHTML =
-"Faaa (test)";
+"En attente";
 
+
+}
+
+
+
+function erreurGPS(){
+
+alert("GPS indisponible");
 
 }
 
 
 
 navigator.geolocation.watchPosition(
+
 positionGPS,
-function(){
-alert("GPS indisponible");
-},
+
+erreurGPS,
+
 {
 enableHighAccuracy:true
 }
+
 );
+
 
 
 </script>
