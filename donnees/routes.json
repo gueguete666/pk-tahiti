@@ -1,0 +1,19 @@
+{
+  "axes": [
+    {
+      "nom": "RT1 - Route de ceinture",
+      "type": "route_territoriale",
+      "ile": "Tahiti"
+    },
+    {
+      "nom": "RT2 - Route de la côte Est",
+      "type": "route_territoriale",
+      "ile": "Tahiti"
+    },
+    {
+      "nom": "Route des plaines",
+      "type": "route_territoriale",
+      "ile": "Tahiti"
+    }
+  ]
+}
