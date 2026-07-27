@@ -1,0 +1,14 @@
+{
+  "axes": [
+    {
+      "nom": "RT1 - Route de ceinture",
+      "ile": "Tahiti",
+      "points": []
+    },
+    {
+      "nom": "RT2 - Route de la côte Est",
+      "ile": "Tahiti",
+      "points": []
+    }
+  ]
+}
