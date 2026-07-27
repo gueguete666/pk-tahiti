@@ -3,12 +3,24 @@
     {
       "nom": "RT1 - Route de ceinture",
       "ile": "Tahiti",
-      "points": []
-    },
-    {
-      "nom": "RT2 - Route de la côte Est",
-      "ile": "Tahiti",
-      "points": []
+      "points": [
+        {
+          "pk": "18+400",
+          "sens": "Montant",
+          "latitude": -17.6214,
+          "longitude": -149.6123,
+          "commune": "Punaauia",
+          "chef_lieu": "Punaauia"
+        },
+        {
+          "pk": "19+000",
+          "sens": "Montant",
+          "latitude": -17.6250,
+          "longitude": -149.6200,
+          "commune": "Punaauia",
+          "chef_lieu": "Punaauia"
+        }
+      ]
     }
   ]
 }
