@@ -8,29 +8,36 @@
 
 <title>PK Tahiti</title>
 
-<!-- Carte Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
 
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
     margin: 0;
+    background: #f5f5f5;
 }
 
 h1 {
-    font-size: 30px;
+    text-align:center;
+    font-size:32px;
 }
 
 #map {
-    height: 60vh;
-    width: 100%;
+    height:40vh;
+    width:100%;
 }
 
 .info {
-    font-size: 18px;
-    margin: 10px;
+    background:white;
+    margin:10px;
+    padding:15px;
+    border-radius:10px;
+    font-size:24px;
+}
+
+.valeur {
+    font-weight:bold;
 }
 
 </style>
@@ -40,32 +47,57 @@ h1 {
 
 <body>
 
+
 <h1>📍 PK Tahiti</h1>
+
 
 <div id="map"></div>
 
 
 <div class="info">
-Latitude : <span id="latitude">...</span>
-</div>
-
-<div class="info">
-Longitude : <span id="longitude">...</span>
-</div>
-
-<div class="info">
-Précision GPS : <span id="precision">...</span>
+🛣️ Axe :
+<br>
+<span class="valeur" id="axe">
+Recherche...
+</span>
 </div>
 
 
 <div class="info">
-🏘️ Commune : <span id="commune">Recherche...</span>
+📍 PK :
+<br>
+<span class="valeur" id="pk">
+Recherche...
+</span>
 </div>
 
 
 <div class="info">
-🏛️ Chef-lieu : <span id="chef-lieu">Recherche...</span>
+⬆️ Sens :
+<br>
+<span class="valeur" id="sens">
+Recherche...
+</span>
 </div>
+
+
+<div class="info">
+🏘️ Commune :
+<br>
+<span class="valeur" id="commune">
+Recherche...
+</span>
+</div>
+
+
+<div class="info">
+🏛️ Chef-lieu :
+<br>
+<span class="valeur" id="chef">
+Recherche...
+</span>
+</div>
+
 
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -74,81 +106,65 @@ Précision GPS : <span id="precision">...</span>
 <script>
 
 
-// Création de la carte
+let carte = L.map('map')
+.setView([-17.55,-149.55],14);
 
-let carte = L.map('map').setView([-17.55, -149.55], 14);
-
-
-// Fond de carte OpenStreetMap
 
 L.tileLayer(
-'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-{
-    attribution: 'OpenStreetMap'
-}
-).addTo(carte);
-
-
-// Marqueur de position
-
-let marqueur = L.marker([-17.55, -149.55])
+'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+)
 .addTo(carte);
 
 
-// Fonction GPS
 
-function obtenirPosition(position) {
-
-
-let latitude = position.coords.latitude;
-let longitude = position.coords.longitude;
+let marqueur = L.marker([-17.55,-149.55])
+.addTo(carte);
 
 
-document.getElementById("latitude").innerHTML =
-latitude;
+
+function positionGPS(position){
 
 
-document.getElementById("longitude").innerHTML =
-longitude;
+let lat = position.coords.latitude;
+let lon = position.coords.longitude;
 
 
-document.getElementById("precision").innerHTML =
-Math.round(position.coords.accuracy) + " mètres";
+marqueur.setLatLng([lat,lon]);
+
+carte.setView([lat,lon]);
 
 
-// Déplacement du marqueur
+// Données temporaires
 
-marqueur.setLatLng([latitude, longitude]);
-
-
-// Centre la carte sur ta position
-
-carte.setView([latitude, longitude]);
+document.getElementById("axe").innerHTML =
+"En attente des données routes";
 
 
-// Test temporaire
+document.getElementById("pk").innerHTML =
+"En attente des PK";
+
+
+document.getElementById("sens").innerHTML =
+"---";
+
 
 document.getElementById("commune").innerHTML =
-"Faaa";
-
-document.getElementById("chef-lieu").innerHTML =
-"Faaa";
-
-}
+"Faaa (test)";
 
 
+document.getElementById("chef").innerHTML =
+"Faaa (test)";
 
-function erreurGPS(){
-
-alert("GPS indisponible");
 
 }
 
 
 
 navigator.geolocation.watchPosition(
-obtenirPosition,
-erreurGPS,
+positionGPS,
+function(){
+alert("GPS indisponible");
+},
 {
 enableHighAccuracy:true
 }
