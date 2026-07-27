@@ -86,11 +86,19 @@ h1 {
 </div>
 
 
+<div class="info">
+📏 Distance du PK :
+<br>
+<span class="valeur" id="distance">Recherche...</span>
+</div>
+
+
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 
 <script>
+
 
 let carte = L.map('map')
 .setView([-17.55,-149.55],14);
@@ -111,7 +119,7 @@ let marqueur = L.marker([-17.55,-149.55])
 let donneesPK = [];
 
 
-// Chargement de la base Tahiti
+// Chargement données PK
 
 fetch("donnees/pk_tahiti.json")
 
@@ -126,31 +134,31 @@ donneesPK = data.axes;
 .catch(()=>{
 
 document.getElementById("pk").innerHTML =
-"Erreur chargement données";
+"Erreur données";
 
 });
 
 
 
 
-// Distance GPS
 
 function distance(lat1,lon1,lat2,lon2){
 
-let R=6371000;
+let R = 6371000;
 
-let dLat=(lat2-lat1)*Math.PI/180;
-let dLon=(lon2-lon1)*Math.PI/180;
+let dLat = (lat2-lat1)*Math.PI/180;
+let dLon = (lon2-lon1)*Math.PI/180;
 
 
 let a =
 Math.sin(dLat/2)**2 +
-Math.cos(lat1*Math.PI/180)*
-Math.cos(lat2*Math.PI/180)*
+Math.cos(lat1*Math.PI/180) *
+Math.cos(lat2*Math.PI/180) *
 Math.sin(dLon/2)**2;
 
 
-return R*2*Math.atan2(
+return R * 2 *
+Math.atan2(
 Math.sqrt(a),
 Math.sqrt(1-a)
 );
@@ -160,10 +168,35 @@ Math.sqrt(1-a)
 
 
 
+function resetAffichage(){
+
+document.getElementById("axe").innerHTML =
+"Non identifié";
+
+document.getElementById("pk").innerHTML =
+"Non disponible";
+
+document.getElementById("sens").innerHTML =
+"---";
+
+document.getElementById("commune").innerHTML =
+"---";
+
+document.getElementById("chef").innerHTML =
+"---";
+
+}
+
+
+
+
 function chercherPK(lat,lon){
 
-let meilleur=null;
-let distanceMin=999999;
+
+let meilleur = null;
+
+let distanceMin = Infinity;
+
 
 
 donneesPK.forEach(axe=>{
@@ -172,7 +205,7 @@ donneesPK.forEach(axe=>{
 axe.points.forEach(point=>{
 
 
-let d=distance(
+let d = distance(
 lat,
 lon,
 point.latitude,
@@ -180,11 +213,12 @@ point.longitude
 );
 
 
-if(d<distanceMin){
 
-distanceMin=d;
-meilleur=point;
-meilleur.axe=axe.nom;
+if(d < distanceMin){
+
+distanceMin = d;
+meilleur = point;
+meilleur.axe = axe.nom;
 
 }
 
@@ -196,41 +230,65 @@ meilleur.axe=axe.nom;
 
 
 
-if(meilleur){
+// Limite de confiance : 100 mètres
+
+if(distanceMin > 100 || meilleur === null){
+
+resetAffichage();
+
+document.getElementById("distance").innerHTML =
+"Position hors zone";
+
+return;
+
+}
+
+
 
 document.getElementById("axe").innerHTML =
 meilleur.axe;
 
+
 document.getElementById("pk").innerHTML =
 meilleur.pk;
 
+
 document.getElementById("sens").innerHTML =
-meilleur.sens || "---";
+meilleur.sens;
+
 
 document.getElementById("commune").innerHTML =
-meilleur.commune || "---";
+meilleur.commune;
+
 
 document.getElementById("chef").innerHTML =
-meilleur.chef_lieu || "---";
+meilleur.chef_lieu;
+
+
+document.getElementById("distance").innerHTML =
+Math.round(distanceMin) + " mètres";
 
 }
 
-}
+
 
 
 
 function positionGPS(position){
 
-let lat=position.coords.latitude;
-let lon=position.coords.longitude;
+
+let lat = position.coords.latitude;
+let lon = position.coords.longitude;
 
 
 marqueur.setLatLng([lat,lon]);
+
 
 carte.setView([lat,lon]);
 
 
 chercherPK(lat,lon);
+
 
 }
 
