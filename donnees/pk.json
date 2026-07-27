@@ -1,0 +1,18 @@
+{
+  "points_kilometriques": [
+    {
+      "pk": 0,
+      "latitude": -17.533,
+      "longitude": -149.568,
+      "commune": "Papeete",
+      "sens": "montant"
+    },
+    {
+      "pk": 1,
+      "latitude": -17.536,
+      "longitude": -149.575,
+      "commune": "Punaauia",
+      "sens": "montant"
+    }
+  ]
+}
