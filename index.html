@@ -43,13 +43,11 @@ h1 {
 
 </head>
 
-
 <body>
 
 <h1>📍 PK Tahiti</h1>
 
 <div id="map"></div>
-
 
 <div class="info">
 🛣️ Axe :
@@ -57,13 +55,11 @@ h1 {
 <span class="valeur" id="axe">Recherche...</span>
 </div>
 
-
 <div class="info">
 📍 PK :
 <br>
 <span class="valeur" id="pk">Recherche...</span>
 </div>
-
 
 <div class="info">
 ⬆️ Sens :
@@ -71,13 +67,11 @@ h1 {
 <span class="valeur" id="sens">Recherche...</span>
 </div>
 
-
 <div class="info">
 🏘️ Commune :
 <br>
 <span class="valeur" id="commune">Recherche...</span>
 </div>
-
 
 <div class="info">
 🏛️ Chef-lieu :
@@ -85,13 +79,11 @@ h1 {
 <span class="valeur" id="chef">Recherche...</span>
 </div>
 
-
 <div class="info">
-📏 Distance du PK :
+📏 Distance :
 <br>
 <span class="valeur" id="distance">Recherche...</span>
 </div>
-
 
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -116,49 +108,39 @@ let marqueur = L.marker([-17.55,-149.55])
 
 
 
-let donneesPK = [];
+let axes = [];
 
 
-// Chargement données PK
 
 fetch("donnees/pk_tahiti.json")
 
-.then(response => response.json())
+.then(r => r.json())
 
 .then(data => {
 
-donneesPK = data.axes;
-
-})
-
-.catch(()=>{
-
-document.getElementById("pk").innerHTML =
-"Erreur données";
+axes = data.axes;
 
 });
 
 
 
 
-
 function distance(lat1,lon1,lat2,lon2){
 
-let R = 6371000;
+let R=6371000;
 
-let dLat = (lat2-lat1)*Math.PI/180;
-let dLon = (lon2-lon1)*Math.PI/180;
+let dLat=(lat2-lat1)*Math.PI/180;
+let dLon=(lon2-lon1)*Math.PI/180;
 
 
 let a =
 Math.sin(dLat/2)**2 +
-Math.cos(lat1*Math.PI/180) *
-Math.cos(lat2*Math.PI/180) *
+Math.cos(lat1*Math.PI/180)*
+Math.cos(lat2*Math.PI/180)*
 Math.sin(dLon/2)**2;
 
 
-return R * 2 *
-Math.atan2(
+return R*2*Math.atan2(
 Math.sqrt(a),
 Math.sqrt(1-a)
 );
@@ -167,45 +149,34 @@ Math.sqrt(1-a)
 
 
 
+function formatPK(pk){
 
-function resetAffichage(){
+let km = Math.floor(pk/1000);
 
-document.getElementById("axe").innerHTML =
-"Non identifié";
+let metres = pk % 1000;
 
-document.getElementById("pk").innerHTML =
-"Non disponible";
-
-document.getElementById("sens").innerHTML =
-"---";
-
-document.getElementById("commune").innerHTML =
-"---";
-
-document.getElementById("chef").innerHTML =
-"---";
+return km+"+"+metres.toString().padStart(3,"0");
 
 }
-
 
 
 
 function chercherPK(lat,lon){
 
 
-let meilleur = null;
+let meilleurAxe=null;
+let meilleurPoint=null;
+let distanceMin=Infinity;
 
-let distanceMin = Infinity;
 
 
-
-donneesPK.forEach(axe=>{
+axes.forEach(axe=>{
 
 
 axe.points.forEach(point=>{
 
 
-let d = distance(
+let d=distance(
 lat,
 lon,
 point.latitude,
@@ -213,12 +184,11 @@ point.longitude
 );
 
 
+if(d<distanceMin){
 
-if(d < distanceMin){
-
-distanceMin = d;
-meilleur = point;
-meilleur.axe = axe.nom;
+distanceMin=d;
+meilleurPoint=point;
+meilleurAxe=axe;
 
 }
 
@@ -230,13 +200,9 @@ meilleur.axe = axe.nom;
 
 
 
-// Limite de confiance : 100 mètres
+if(distanceMin>100 || !meilleurPoint){
 
-if(distanceMin > 100 || meilleur === null){
-
-resetAffichage();
-
-document.getElementById("distance").innerHTML =
+document.getElementById("pk").innerHTML =
 "Position hors zone";
 
 return;
@@ -244,68 +210,113 @@ return;
 }
 
 
+// Recherche des points voisins
 
-document.getElementById("axe").innerHTML =
-meilleur.axe;
-
-
-document.getElementById("pk").innerHTML =
-meilleur.pk;
+let points = meilleurAxe.points;
 
 
-document.getElementById("sens").innerHTML =
-meilleur.sens;
+let index = points.indexOf(meilleurPoint);
 
 
-document.getElementById("commune").innerHTML =
-meilleur.commune;
+let pkFinal = meilleurPoint.pk;
 
 
-document.getElementById("chef").innerHTML =
-meilleur.chef_lieu;
+
+if(index < points.length-1){
 
 
-document.getElementById("distance").innerHTML =
-Math.round(distanceMin) + " mètres";
+let suivant = points[index+1];
+
+
+let distanceSegment =
+distance(
+meilleurPoint.latitude,
+meilleurPoint.longitude,
+suivant.latitude,
+suivant.longitude
+);
+
+
+let distancePosition =
+distance(
+meilleurPoint.latitude,
+meilleurPoint.longitude,
+lat,
+lon
+);
+
+
+
+let ratio =
+distancePosition / distanceSegment;
+
+
+
+if(ratio>=0 && ratio<=1){
+
+pkFinal =
+Math.round(
+meilleurPoint.pk +
+(suivant.pk-meilleurPoint.pk)*ratio
+);
+
+}
+
 
 }
 
 
 
+document.getElementById("axe").innerHTML =
+meilleurAxe.nom;
+
+
+document.getElementById("pk").innerHTML =
+formatPK(pkFinal);
+
+
+document.getElementById("sens").innerHTML =
+"Montant";
+
+
+document.getElementById("commune").innerHTML =
+meilleurPoint.commune;
+
+
+document.getElementById("chef").innerHTML =
+meilleurPoint.chef_lieu;
+
+
+document.getElementById("distance").innerHTML =
+Math.round(distanceMin)+" m";
+
+}
+
 
 
 function positionGPS(position){
 
-
-let lat = position.coords.latitude;
-let lon = position.coords.longitude;
+let lat=position.coords.latitude;
+let lon=position.coords.longitude;
 
 
 marqueur.setLatLng([lat,lon]);
-
 
 carte.setView([lat,lon]);
 
 
 chercherPK(lat,lon);
 
-
 }
 
 
 
 navigator.geolocation.watchPosition(
-
 positionGPS,
-
-function(){
-alert("GPS indisponible");
-},
-
+()=>alert("GPS indisponible"),
 {
 enableHighAccuracy:true
 }
-
 );
 
 
