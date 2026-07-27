@@ -1,103 +1,163 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>PK Tahiti</title>
 
+<!-- Carte Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
 <style>
+
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    padding: 20px;
+    margin: 0;
 }
 
 h1 {
-    font-size: 35px;
+    font-size: 30px;
+}
+
+#map {
+    height: 60vh;
+    width: 100%;
 }
 
 .info {
-    font-size: 22px;
-    margin: 15px;
+    font-size: 18px;
+    margin: 10px;
 }
+
 </style>
 
 </head>
+
 
 <body>
 
 <h1>📍 PK Tahiti</h1>
 
+<div id="map"></div>
+
+
 <div class="info">
-Latitude : <span id="latitude">En attente...</span>
+Latitude : <span id="latitude">...</span>
 </div>
 
 <div class="info">
-Longitude : <span id="longitude">En attente...</span>
+Longitude : <span id="longitude">...</span>
 </div>
 
 <div class="info">
-Vitesse : <span id="vitesse">En attente...</span>
+Précision GPS : <span id="precision">...</span>
 </div>
 
-<div class="info">
-Précision GPS : <span id="precision">En attente...</span>
-</div>
 
 <div class="info">
 🏘️ Commune : <span id="commune">Recherche...</span>
 </div>
+
 
 <div class="info">
 🏛️ Chef-lieu : <span id="chef-lieu">Recherche...</span>
 </div>
 
 
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
 <script>
+
+
+// Création de la carte
+
+let carte = L.map('map').setView([-17.55, -149.55], 14);
+
+
+// Fond de carte OpenStreetMap
+
+L.tileLayer(
+'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+    attribution: 'OpenStreetMap'
+}
+).addTo(carte);
+
+
+// Marqueur de position
+
+let marqueur = L.marker([-17.55, -149.55])
+.addTo(carte);
+
+
+// Fonction GPS
 
 function obtenirPosition(position) {
 
-    document.getElementById("latitude").innerHTML =
-    position.coords.latitude;
 
-    document.getElementById("longitude").innerHTML =
-    position.coords.longitude;
-
-    let vitesse = position.coords.speed;
-
-    if (vitesse) {
-        vitesse = (vitesse * 3.6).toFixed(1) + " km/h";
-    } else {
-        vitesse = "0 km/h";
-    }
-
-    document.getElementById("vitesse").innerHTML = vitesse;
-
-    document.getElementById("precision").innerHTML =
-    Math.round(position.coords.accuracy) + " mètres";
+let latitude = position.coords.latitude;
+let longitude = position.coords.longitude;
 
 
-    // Test temporaire avant intégration des vraies données
-    document.getElementById("commune").innerHTML = "Faaa";
-    document.getElementById("chef-lieu").innerHTML = "Faaa";
+document.getElementById("latitude").innerHTML =
+latitude;
+
+
+document.getElementById("longitude").innerHTML =
+longitude;
+
+
+document.getElementById("precision").innerHTML =
+Math.round(position.coords.accuracy) + " mètres";
+
+
+// Déplacement du marqueur
+
+marqueur.setLatLng([latitude, longitude]);
+
+
+// Centre la carte sur ta position
+
+carte.setView([latitude, longitude]);
+
+
+// Test temporaire
+
+document.getElementById("commune").innerHTML =
+"Faaa";
+
+document.getElementById("chef-lieu").innerHTML =
+"Faaa";
+
 }
 
 
-function erreurGPS() {
-    alert("Impossible d'obtenir la position GPS");
+
+function erreurGPS(){
+
+alert("GPS indisponible");
+
 }
+
 
 
 navigator.geolocation.watchPosition(
-    obtenirPosition,
-    erreurGPS,
-    {
-        enableHighAccuracy: true
-    }
+obtenirPosition,
+erreurGPS,
+{
+enableHighAccuracy:true
+}
 );
+
 
 </script>
 
+
 </body>
+
 </html>
