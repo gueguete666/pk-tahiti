@@ -3,15 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>PK Tahiti</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 35px;
+}
+
+.info {
+    font-size: 22px;
+    margin: 15px;
+}
+</style>
+
 </head>
+
 <body>
+
 <h1>📍 PK Tahiti</h1>
-<p>Application de géolocalisation des points kilométriques</p>
-<hr>
-<h2>Informations GPS</h2>
-<p>Latitude : en attente</p>
-<p>Longitude : en attente</p>
-<p>Vitesse : en attente</p>
+
+<div class="info">
+Latitude : <span id="latitude">En attente...</span>
+</div>
+
+<div class="info">
+Longitude : <span id="longitude">En attente...</span>
+</div>
+
+<div class="info">
+Vitesse : <span id="vitesse">En attente...</span>
+</div>
+
+<div class="info">
+Précision GPS : <span id="precision">En attente...</span>
+</div>
+
+
+<script>
+
+function obtenirPosition(position) {
+
+    document.getElementById("latitude").innerHTML =
+    position.coords.latitude;
+
+    document.getElementById("longitude").innerHTML =
+    position.coords.longitude;
+
+    let vitesse = position.coords.speed;
+
+    if (vitesse) {
+        vitesse = (vitesse * 3.6).toFixed(1) + " km/h";
+    } else {
+        vitesse = "0 km/h";
+    }
+
+    document.getElementById("vitesse").innerHTML = vitesse;
+
+    document.getElementById("precision").innerHTML =
+    Math.round(position.coords.accuracy) + " mètres";
+}
+
+
+function erreurGPS() {
+    alert("Impossible d'obtenir la position GPS");
+}
+
+
+navigator.geolocation.watchPosition(
+    obtenirPosition,
+    erreurGPS,
+    {
+        enableHighAccuracy: true
+    }
+);
+
+</script>
+
 </body>
 </html>
