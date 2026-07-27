@@ -45,6 +45,14 @@ Vitesse : <span id="vitesse">En attente...</span>
 Précision GPS : <span id="precision">En attente...</span>
 </div>
 
+<div class="info">
+🏘️ Commune : <span id="commune">Recherche...</span>
+</div>
+
+<div class="info">
+🏛️ Chef-lieu : <span id="chef-lieu">Recherche...</span>
+</div>
+
 
 <script>
 
@@ -68,6 +76,11 @@ function obtenirPosition(position) {
 
     document.getElementById("precision").innerHTML =
     Math.round(position.coords.accuracy) + " mètres";
+
+
+    // Test temporaire avant intégration des vraies données
+    document.getElementById("commune").innerHTML = "Faaa";
+    document.getElementById("chef-lieu").innerHTML = "Faaa";
 }
 
 
