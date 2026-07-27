@@ -1,0 +1,16 @@
+{
+  "communes": [
+    {
+      "nom": "Faaa",
+      "chef_lieu": "Faaa"
+    },
+    {
+      "nom": "Papeete",
+      "chef_lieu": "Papeete"
+    },
+    {
+      "nom": "Pirae",
+      "chef_lieu": "Pirae"
+    }
+  ]
+}
