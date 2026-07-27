@@ -14,7 +14,7 @@
 
 body {
     font-family: Arial, sans-serif;
-    margin: 0;
+    margin:0;
     background:#f2f2f2;
 }
 
@@ -47,7 +47,6 @@ h1 {
 <body>
 
 <h1>📍 PK Tahiti</h1>
-
 
 <div id="map"></div>
 
@@ -93,7 +92,6 @@ h1 {
 
 <script>
 
-
 let carte = L.map('map')
 .setView([-17.55,-149.55],14);
 
@@ -104,53 +102,55 @@ L.tileLayer(
 .addTo(carte);
 
 
+
 let marqueur = L.marker([-17.55,-149.55])
 .addTo(carte);
 
 
 
-let listePK = [];
+let donneesPK = [];
 
 
-// Chargement des PK
+// Chargement de la base Tahiti
 
-fetch("donnees/pk.json")
+fetch("donnees/pk_tahiti.json")
 
 .then(response => response.json())
 
 .then(data => {
 
-listePK = data.pk;
+donneesPK = data.axes;
 
 })
 
 .catch(()=>{
 
-alert("Erreur chargement PK");
+document.getElementById("pk").innerHTML =
+"Erreur chargement données";
 
 });
 
 
 
-// Calcul distance entre deux points GPS
 
-function distance(lat1, lon1, lat2, lon2){
+// Distance GPS
 
-let R = 6371000;
+function distance(lat1,lon1,lat2,lon2){
 
-let dLat = (lat2-lat1)*Math.PI/180;
+let R=6371000;
 
-let dLon = (lon2-lon1)*Math.PI/180;
+let dLat=(lat2-lat1)*Math.PI/180;
+let dLon=(lon2-lon1)*Math.PI/180;
 
 
 let a =
 Math.sin(dLat/2)**2 +
-Math.cos(lat1*Math.PI/180) *
-Math.cos(lat2*Math.PI/180) *
+Math.cos(lat1*Math.PI/180)*
+Math.cos(lat2*Math.PI/180)*
 Math.sin(dLon/2)**2;
 
 
-return R * 2 * Math.atan2(
+return R*2*Math.atan2(
 Math.sqrt(a),
 Math.sqrt(1-a)
 );
@@ -159,31 +159,20 @@ Math.sqrt(1-a)
 
 
 
-// Recherche PK le plus proche
 
 function chercherPK(lat,lon){
 
-
-if(listePK.length===0){
-return;
-}
+let meilleur=null;
+let distanceMin=999999;
 
 
-let meilleur = listePK[0];
-
-let distanceMin = distance(
-lat,
-lon,
-meilleur.latitude,
-meilleur.longitude
-);
+donneesPK.forEach(axe=>{
 
 
+axe.points.forEach(point=>{
 
-listePK.forEach(point=>{
 
-
-let d = distance(
+let d=distance(
 lat,
 lon,
 point.latitude,
@@ -191,10 +180,11 @@ point.longitude
 );
 
 
-if(d < distanceMin){
+if(d<distanceMin){
 
-distanceMin = d;
-meilleur = point;
+distanceMin=d;
+meilleur=point;
+meilleur.axe=axe.nom;
 
 }
 
@@ -202,26 +192,28 @@ meilleur = point;
 });
 
 
+});
+
+
+
+if(meilleur){
 
 document.getElementById("axe").innerHTML =
 meilleur.axe;
 
-
 document.getElementById("pk").innerHTML =
-meilleur.numero;
-
+meilleur.pk;
 
 document.getElementById("sens").innerHTML =
-meilleur.sens;
-
+meilleur.sens || "---";
 
 document.getElementById("commune").innerHTML =
-meilleur.commune;
-
+meilleur.commune || "---";
 
 document.getElementById("chef").innerHTML =
-meilleur.chef_lieu;
+meilleur.chef_lieu || "---";
 
+}
 
 }
 
@@ -229,20 +221,16 @@ meilleur.chef_lieu;
 
 function positionGPS(position){
 
-
-let lat = position.coords.latitude;
-
-let lon = position.coords.longitude;
+let lat=position.coords.latitude;
+let lon=position.coords.longitude;
 
 
 marqueur.setLatLng([lat,lon]);
-
 
 carte.setView([lat,lon]);
 
 
 chercherPK(lat,lon);
-
 
 }
 
