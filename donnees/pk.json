@@ -1,18 +1,22 @@
 {
-  "points_kilometriques": [
+  "pk": [
     {
-      "pk": 0,
-      "latitude": -17.533,
-      "longitude": -149.568,
-      "commune": "Papeete",
-      "sens": "montant"
+      "axe": "RT1 - Route de ceinture",
+      "numero": "18+400",
+      "sens": "montant",
+      "latitude": -17.6214,
+      "longitude": -149.6123,
+      "commune": "Punaauia",
+      "chef_lieu": "Punaauia"
     },
     {
-      "pk": 1,
-      "latitude": -17.536,
-      "longitude": -149.575,
+      "axe": "RT1 - Route de ceinture",
+      "numero": "19+000",
+      "sens": "montant",
+      "latitude": -17.6250,
+      "longitude": -149.6200,
       "commune": "Punaauia",
-      "sens": "montant"
+      "chef_lieu": "Punaaucia"
     }
   ]
 }
