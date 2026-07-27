@@ -15,7 +15,7 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    background: #f2f2f2;
+    background:#f2f2f2;
 }
 
 h1 {
@@ -25,7 +25,6 @@ h1 {
 
 #map {
     height:40vh;
-    width:100%;
 }
 
 .info {
@@ -33,7 +32,7 @@ h1 {
     margin:10px;
     padding:15px;
     border-radius:12px;
-    font-size:23px;
+    font-size:22px;
 }
 
 .valeur {
@@ -95,19 +94,14 @@ h1 {
 <script>
 
 
-// Création carte
-
 let carte = L.map('map')
 .setView([-17.55,-149.55],14);
 
 
 L.tileLayer(
-'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-{
-attribution:'OpenStreetMap'
-}
-).addTo(carte);
-
+'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+)
+.addTo(carte);
 
 
 let marqueur = L.marker([-17.55,-149.55])
@@ -115,83 +109,140 @@ let marqueur = L.marker([-17.55,-149.55])
 
 
 
-// Chargement des données routes
-
-let routes = [];
+let listePK = [];
 
 
-fetch("donnees/routes.json")
+// Chargement des PK
+
+fetch("donnees/pk.json")
 
 .then(response => response.json())
 
 .then(data => {
 
-routes = data.axes;
-
-document.getElementById("axe").innerHTML =
-routes[0].nom;
+listePK = data.pk;
 
 })
 
-.catch(() => {
+.catch(()=>{
 
-document.getElementById("axe").innerHTML =
-"Erreur données routes";
+alert("Erreur chargement PK");
 
 });
 
 
 
+// Calcul distance entre deux points GPS
 
-// GPS
+function distance(lat1, lon1, lat2, lon2){
 
-function positionGPS(position){
+let R = 6371000;
 
+let dLat = (lat2-lat1)*Math.PI/180;
 
-let latitude = position.coords.latitude;
-
-let longitude = position.coords.longitude;
-
-
-
-marqueur.setLatLng([
-latitude,
-longitude
-]);
+let dLon = (lon2-lon1)*Math.PI/180;
 
 
-carte.setView([
-latitude,
-longitude
-]);
+let a =
+Math.sin(dLat/2)**2 +
+Math.cos(lat1*Math.PI/180) *
+Math.cos(lat2*Math.PI/180) *
+Math.sin(dLon/2)**2;
+
+
+return R * 2 * Math.atan2(
+Math.sqrt(a),
+Math.sqrt(1-a)
+);
+
+}
 
 
 
-// Affichage test
+// Recherche PK le plus proche
+
+function chercherPK(lat,lon){
+
+
+if(listePK.length===0){
+return;
+}
+
+
+let meilleur = listePK[0];
+
+let distanceMin = distance(
+lat,
+lon,
+meilleur.latitude,
+meilleur.longitude
+);
+
+
+
+listePK.forEach(point=>{
+
+
+let d = distance(
+lat,
+lon,
+point.latitude,
+point.longitude
+);
+
+
+if(d < distanceMin){
+
+distanceMin = d;
+meilleur = point;
+
+}
+
+
+});
+
+
+
+document.getElementById("axe").innerHTML =
+meilleur.axe;
+
 
 document.getElementById("pk").innerHTML =
-"En attente des PK";
+meilleur.numero;
 
 
 document.getElementById("sens").innerHTML =
-"---";
+meilleur.sens;
 
 
 document.getElementById("commune").innerHTML =
-"En attente";
+meilleur.commune;
 
 
 document.getElementById("chef").innerHTML =
-"En attente";
+meilleur.chef_lieu;
 
 
 }
 
 
 
-function erreurGPS(){
+function positionGPS(position){
 
-alert("GPS indisponible");
+
+let lat = position.coords.latitude;
+
+let lon = position.coords.longitude;
+
+
+marqueur.setLatLng([lat,lon]);
+
+
+carte.setView([lat,lon]);
+
+
+chercherPK(lat,lon);
+
 
 }
 
@@ -201,14 +252,15 @@ navigator.geolocation.watchPosition(
 
 positionGPS,
 
-erreurGPS,
+function(){
+alert("GPS indisponible");
+},
 
 {
 enableHighAccuracy:true
 }
 
 );
-
 
 
 </script>
